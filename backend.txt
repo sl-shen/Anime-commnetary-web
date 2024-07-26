@@ -1,0 +1,14 @@
+Features:
+1. sign up; login; log out.
+
+2. search anime/manga/game resources via api
+   add into self database; add rating and comment;
+   update
+   delete
+   find
+
+3. create group database;
+   authorize other users
+   delete user
+
+4.
