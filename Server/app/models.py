@@ -10,16 +10,22 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
 
+    media = relationship("UserMedia", back_populates="user")
     reviews = relationship("Review", back_populates="user")
 
-class Anime(Base):
-    __tablename__ = "animes"
+class UserMedia(Base):
+    __tablename__ = "user_media"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    bangumi_id = Column(Integer, index=True)
     title = Column(String, index=True)
-    description = Column(String)
-    
-    reviews = relationship("Review", back_populates="anime")
+    media_type = Column(Integer)  # 1=book, 2=anime, 3=music, 4=game, 6=real
+    image = Column(String)
+    summary = Column(String)
+
+    user = relationship("User", back_populates="media")
+    reviews = relationship("Review", back_populates="media")
 
 class Review(Base):
     __tablename__ = "reviews"
@@ -28,7 +34,7 @@ class Review(Base):
     text = Column(String)
     rating = Column(Float)
     user_id = Column(Integer, ForeignKey("users.id"))
-    anime_id = Column(Integer, ForeignKey("animes.id"))
+    media_id = Column(Integer, ForeignKey("user_media.id"))
 
     user = relationship("User", back_populates="reviews")
-    anime = relationship("Anime", back_populates="reviews")
+    media = relationship("UserMedia", back_populates="reviews")

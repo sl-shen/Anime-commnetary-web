@@ -22,3 +22,27 @@ class TokenPair(Token):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+class BangumiSearchResult(BaseModel):
+    id: int
+    title: str
+    image: str
+    summary: str
+    type: int
+
+class UserMediaBase(BaseModel):
+    bangumi_id: int
+    title: str
+    media_type: int
+    image: str
+    summary: str
+
+class UserMediaCreate(UserMediaBase):
+    pass
+
+class UserMedia(UserMediaBase):
+    id: int
+    user_id: int
+
+    class Config:
+        from_attributes = True
