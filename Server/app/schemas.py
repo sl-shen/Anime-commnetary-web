@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 
 class UserBase(BaseModel):
     username: str
@@ -43,6 +44,25 @@ class UserMediaCreate(UserMediaBase):
 class UserMedia(UserMediaBase):
     id: int
     user_id: int
+
+    class Config:
+        from_attributes = True
+
+class ReviewBase(BaseModel):
+    text: str
+    rating: float = Field(..., ge=0, le=10)
+
+class ReviewCreate(ReviewBase):
+    pass
+
+class ReviewUpdate(BaseModel):
+    text: Optional[str] = None
+    rating: Optional[float] = Field(..., ge=0, le=10)
+
+class Review(ReviewBase):
+    id: int
+    user_id: int
+    media_id: int
 
     class Config:
         from_attributes = True

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from . import models
-from .routers import users, animes, reviews, bangumi
+from .routers import users, media, reviews, bangumi
 from dotenv import load_dotenv
 import uvicorn
 
@@ -19,6 +19,7 @@ origins = [
     "http://localhost:8080",
     "http://192.168.1.240:7979",
     "http://192.168.1.240:8000",
+    "http://127.0.0.1:8000"
     
 ]
 
@@ -31,9 +32,9 @@ app.add_middleware(
 )
 
 app.include_router(users.router)
-app.include_router(animes.router)
-app.include_router(reviews.router)
+app.include_router(reviews.router, prefix="/reviews", tags=["reviews"])
 app.include_router(bangumi.router, prefix="/bangumi", tags=["bangumi"])
+app.include_router(media.router, prefix="/media", tags=["media"])
 
 @app.get("/")
 async def root():
