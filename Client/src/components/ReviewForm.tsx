@@ -5,9 +5,10 @@ interface ReviewFormProps {
   mediaId: number;
   initialReview?: { id: number; text: string; rating: number };
   onReviewSubmit: () => void;
+  onCancel: () => void;
 }
 
-const ReviewForm: React.FC<ReviewFormProps> = ({ mediaId, initialReview, onReviewSubmit }) => {
+const ReviewForm: React.FC<ReviewFormProps> = ({ mediaId, initialReview, onReviewSubmit, onCancel }) => {
   const [text, setText] = useState('');
   const [rating, setRating] = useState(0);
   const [error, setError] = useState('');
@@ -78,10 +79,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ mediaId, initialReview, onRevie
           className="mt-1 block w-full p-2 border rounded"
         />
       </div>
-      {error && <p className="text-red-500">{error}</p>}
-      <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">
-        {initialReview ? '更新评论' : '添加评论'}
-      </button>
+      <div className="flex space-x-2">
+        <button type="submit" className="flex-1 p-2 bg-blue-500 text-white rounded">
+          {initialReview ? '更新评论' : '添加评论'}
+        </button>
+        <button type="button" onClick={onCancel} className="flex-1 p-2 bg-gray-300 text-gray-700 rounded">
+          取消
+        </button>
+      </div>
     </form>
   );
 };

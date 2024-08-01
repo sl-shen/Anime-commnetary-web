@@ -21,7 +21,7 @@ async def search_bangumi(media_type: int, query: str):
     return [schemas.BangumiSearchResult(
         id=item['id'],
         title=item['name'],
-        image=item.get('images', {}).get('small', ''),
+        image=item.get('images', {}).get('large', ''),
         summary=item.get('summary', ''),
         type=item['type']
     ) for item in data['list']]
@@ -47,7 +47,7 @@ def add_to_user_list(
             bangumi_id=bangumi_id,
             title=bangumi_data['name'],
             media_type=bangumi_data['type'],
-            image=bangumi_data.get('images', {}).get('small', ''),
+            image=bangumi_data.get('images', {}).get('large', ''),
             summary=bangumi_data.get('summary', '')
         )
     )

@@ -8,13 +8,22 @@ interface SearchResult {
   summary: string;
 }
 
-const MediaSearch: React.FC = () => {
+const mediaTypes = [
+  { id: 1, name: "书籍" },
+  { id: 2, name: "动画" },
+  { id: 3, name: "音乐" },
+  { id: 4, name: "游戏" },
+  { id: 6, name: "真人" }
+];
+
+const MediaSearch: React.FC<{ onAddMedia: () => void }> = ({ onAddMedia }) => {
   const [query, setQuery] = useState('');
+  const [mediaType, setMediaType] = useState(2); // 默认为动画
   const [results, setResults] = useState<SearchResult[]>([]);
 
   const handleSearch = async () => {
     try {
-      const response = await searchMedia(query, 2); // Assuming 2 is for anime
+      const response = await searchMedia(query, mediaType);
       setResults(response.data);
     } catch (error) {
       console.error('Search failed', error);
@@ -25,6 +34,7 @@ const MediaSearch: React.FC = () => {
     try {
       await addMedia(bangumiId);
       alert('Media added to your library');
+      onAddMedia(); 
     } catch (error) {
       console.error('Failed to add media', error);
     }
@@ -37,11 +47,20 @@ const MediaSearch: React.FC = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search media"
+          placeholder="搜索媒体"
           className="flex-grow p-2 border rounded"
         />
+        <select
+          value={mediaType}
+          onChange={(e) => setMediaType(Number(e.target.value))}
+          className="p-2 border rounded"
+        >
+          {mediaTypes.map(type => (
+            <option key={type.id} value={type.id}>{type.name}</option>
+          ))}
+        </select>
         <button onClick={handleSearch} className="p-2 bg-blue-500 text-white rounded">
-          Search
+          搜索
         </button>
       </div>
       <div className="space-y-4">
@@ -55,7 +74,7 @@ const MediaSearch: React.FC = () => {
                 onClick={() => handleAdd(result.id)}
                 className="mt-2 px-4 py-2 bg-green-500 text-white rounded"
               >
-                Add to Library
+                添加到库
               </button>
             </div>
           </div>

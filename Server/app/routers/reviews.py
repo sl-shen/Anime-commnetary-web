@@ -27,16 +27,10 @@ def update_review(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    print(f"Received update request for review {review_id}")
-    print(f"Review data: {review.dict()}")
-    print(f"Current user: {current_user.id}")
-    
     try:
         updated_review = crud.update_review(db=db, review_id=review_id, user_id=current_user.id, review=review)
-        print(f"Review updated successfully: {updated_review}")
         return updated_review
     except Exception as e:
-        print(f"Error updating review: {str(e)}")
         raise
 
 @router.delete("/delete/{review_id}")

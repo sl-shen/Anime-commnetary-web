@@ -40,14 +40,4 @@ export const addMedia = (bangumiId: number) =>
 export const getUserMedia = () =>
   api.get('/media/getAll');
 
-export const getMedia = (id: number) => {
-  return api.get(`/media/get/`, { params: { media_id: id } });
-};
-
-export const addReview = (mediaId: number, text: string, rating: number) =>
-  api.post(`/reviews/add/${mediaId}`, { text, rating });
-
-export const updateReview = (reviewId: number, text: string, rating: number) =>
-  api.put(`/reviews/update/${reviewId}`, { text, rating });
-
 export default api;

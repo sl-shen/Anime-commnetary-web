@@ -17,7 +17,7 @@ const MediaList: React.FC<MediaListProps> = ({ media }) => {
       {media.map((item) => (
         <Link to={`/media/${item.id}`} key={item.id} className="block">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <img src={item.image} alt={item.title} className="w-full h-48 object-cover" />
+            <img src={item.image} alt={item.title} className="w-full h-64 object-cover" />
             <div className="p-2">
               <h3 className="text-sm font-medium truncate">{item.title}</h3>
             </div>
