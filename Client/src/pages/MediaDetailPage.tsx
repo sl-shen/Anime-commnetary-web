@@ -8,18 +8,23 @@ interface Media {
   title: string;
   image: string;
   summary: string;
+  bangumi_id: number;
+  media_type: number;
 }
 
 interface Review {
   id: number;
   text: string;
   rating: number;
+  user_id: number;
 }
 
 const MediaDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [media, setMedia] = useState<Media | null>(null);
   const [review, setReview] = useState<Review | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchMediaDetails();
@@ -28,19 +33,26 @@ const MediaDetail: React.FC = () => {
 
   const fetchMediaDetails = async () => {
     try {
-      const response = await api.get(`media/get/${id}`);
-      setMedia(response.data);
+      const response = await api.get(`/media/get/${id}`);
+      setMedia(response.data[0]);
     } catch (error) {
       console.error('Failed to fetch media details', error);
+      setError('获取媒体详情失败');
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchReview = async () => {
     try {
-      const response = await api.get(`reviews/media/${id}`);
-      setReview(response.data);
+      const response = await api.get(`/reviews/media/${id}`);
+      if (response.data && response.data.length > 0) {
+        setReview(response.data[0]);
+        console.log("Fetched review:", response.data[0]);
+      }
     } catch (error) {
       console.error('Failed to fetch review', error);
+
     }
   };
 
@@ -48,7 +60,9 @@ const MediaDetail: React.FC = () => {
     fetchReview();
   };
 
-  if (!media) return <div>Loading...</div>;
+  if (loading) return <div>加载中...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (!media) return <div>未找到媒体信息</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -60,7 +74,7 @@ const MediaDetail: React.FC = () => {
           <h1 className="text-3xl font-bold mb-4">{media.title}</h1>
           <p className="text-gray-600 mb-6">{media.summary}</p>
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-4">Your Review</h2>
+            <h2 className="text-2xl font-bold mb-4">您的评论</h2>
             <ReviewForm
               mediaId={parseInt(id!)}
               initialReview={review || undefined}

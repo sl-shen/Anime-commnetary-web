@@ -32,7 +32,7 @@ class Review(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     text = Column(String)
-    rating = Column(Float)
+    rating = Column(Integer)
     user_id = Column(Integer, ForeignKey("users.id"))
     media_id = Column(Integer, ForeignKey("user_media.id"))
 

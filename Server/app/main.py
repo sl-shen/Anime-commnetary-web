@@ -5,6 +5,9 @@ from . import models
 from .routers import users, media, reviews, bangumi
 from dotenv import load_dotenv
 import uvicorn
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -39,6 +42,7 @@ app.include_router(media.router, prefix="/media", tags=["media"])
 @app.get("/")
 async def root():
     return {"message": "Welcome to Anime Review API"}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
