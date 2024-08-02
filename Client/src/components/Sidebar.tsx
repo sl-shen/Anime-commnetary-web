@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated} = useAuth();
 
   return (
     <div className="fixed top-0 left-0 h-full w-38 bg-gray-800 text-white">
@@ -16,12 +16,6 @@ const Sidebar: React.FC = () => {
             <Link to="/home" className="block py-2 px-4 hover:bg-gray-700 transition duration-150">Home</Link>
             <Link to="/library" className="block py-2 px-4 hover:bg-gray-700 transition duration-150">Library</Link>
             <Link to="/settings" className="block py-2 px-4 hover:bg-gray-700 transition duration-150">Settings</Link>
-            <button 
-              onClick={logout} 
-              className="block w-full text-left py-2 px-4 hover:bg-gray-700 transition duration-150"
-            >
-              Logout
-            </button>
           </>
         ) : (
           <>

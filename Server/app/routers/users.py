@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from .. import crud, models, schemas, auth
 from ..database import get_db
 from pydantic import BaseModel
+from .. auth import get_current_user
 
 router = APIRouter()
 
@@ -46,3 +47,18 @@ def refresh_token(token: str = Depends(auth.oauth2_scheme), db: Session = Depend
         )
     access_token = auth.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/info", response_model=schemas.User)
+def get_user_info(current_user: schemas.User = Depends(get_current_user)):
+    return current_user
+
+@router.put("/update", response_model=schemas.User)
+def update_username(
+    user_update: schemas.UserUpdate,
+    current_user: schemas.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    updated_user = crud.update_user(db, current_user.id, user_update)
+    if updated_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return updated_user

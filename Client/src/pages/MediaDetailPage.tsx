@@ -31,14 +31,15 @@ const MediaDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [media, setMedia] = useState<Media | null>(null);
-  const [review, setReview] = useState<Review | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
+  const [showAddReviewForm, setShowAddReviewForm] = useState(false);
 
   useEffect(() => {
     fetchMediaDetails();
-    fetchReview();
+    fetchReviews();
   }, [id]);
 
   const fetchMediaDetails = async () => {
@@ -53,36 +54,38 @@ const MediaDetail: React.FC = () => {
     }
   };
 
-  const fetchReview = async () => {
+  const fetchReviews = async () => {
     try {
       const response = await axios.get(`http://localhost:8000/reviews/media/${id}`);
       if (response.data && response.data.length > 0) {
-        setReview(response.data[0]);
-        console.log("Fetched review:", response.data[0]);
+        setReviews(response.data);
       } else {
-        setReview(null);
+        setReviews([]);
       }
     } catch (error) {
-      console.error('Failed to fetch review', error);
-      setReview(null);
+      console.error('Failed to fetch reviews', error);
+      setReviews([]);
     }
   };
 
   const handleReviewSubmit = () => {
-    fetchReview();
-    setShowReviewForm(false);
+    fetchReviews();
+    setEditingReviewId(null);
+    setShowAddReviewForm(false);
   };
 
-  const handleDeleteReview = async () => {
-    if (!review) return;
+  const handleDeleteReview = async (reviewId: number) => {
+
+    const confirmDelete = window.confirm("确定要删除这个评论吗？此操作不可撤销。");
+    if (!confirmDelete) return;
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:8000/reviews/delete/${review.id}`, {
+      await axios.delete(`http://localhost:8000/reviews/delete/${reviewId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setReview(null);
       console.log("Review deleted successfully");
+      fetchReviews();
     } catch (error) {
       console.error('Failed to delete review', error);
       setError('删除评论失败');
@@ -101,14 +104,14 @@ const MediaDetail: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log("Media deleted successfully");
-      navigate('/library'); // 导航到 library 页面
+      navigate('/library');
     } catch (error) {
       console.error('Failed to delete media', error);
       setError('删除媒体失败');
     }
   };
 
- const getMediaTypeName = (typeId: number) => {
+  const getMediaTypeName = (typeId: number) => {
     const mediaType = mediaTypes.find(type => type.id === typeId);
     return mediaType ? mediaType.name : '其他类型';
   };
@@ -128,7 +131,7 @@ const MediaDetail: React.FC = () => {
 
       <button 
         onClick={handleDeleteMedia}
-        className="absolute top-0 right-0 mt-4 ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
+        className="absolute top-0 right-0 mt-4 mr-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
       >
         删除媒体
       </button>
@@ -144,57 +147,67 @@ const MediaDetail: React.FC = () => {
             </div>
             <h1 className="mt-1 text-4xl font-bold text-gray-900">{media.title}</h1>
             <p className="mt-4 text-gray-600">{media.summary}</p>
-            
           </div>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-4">您的评论</h2>
-        {review ? (
-          <div>
-            <div className="bg-gray-100 p-4 rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">评论</h2>
+          <button 
+            onClick={() => setShowAddReviewForm(true)} 
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300"
+          >
+            添加新评论
+          </button>
+        </div>
+
+        {showAddReviewForm && (
+          <div className="mb-6">
+            <ReviewForm
+              mediaId={parseInt(id!)}
+              onReviewSubmit={handleReviewSubmit}
+              onCancel={() => setShowAddReviewForm(false)}
+            />
+          </div>
+        )}
+
+        {reviews.length > 0 ? (
+          reviews.map((review) => (
+            <div key={review.id} className="mb-6 bg-gray-100 p-4 rounded-lg">
               <div className="flex items-center mb-2">
                 <span className="text-xl font-bold mr-2">评分:</span>
                 <span className="text-2xl text-yellow-500">{review.rating} / 10</span>
               </div>
               <p className="text-gray-700"><span className="font-bold">评论:</span> {review.text}</p>
+              <div className="mt-4 space-x-2">
+                <button 
+                  onClick={() => setEditingReviewId(review.id)} 
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300"
+                >
+                  更新评论
+                </button>
+                <button 
+                  onClick={() => handleDeleteReview(review.id)} 
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
+                >
+                  删除评论
+                </button>
+              </div>
+              {editingReviewId === review.id && (
+                <div className="mt-4">
+                  <ReviewForm
+                    mediaId={parseInt(id!)}
+                    initialReview={review}
+                    onReviewSubmit={handleReviewSubmit}
+                    onCancel={() => setEditingReviewId(null)}
+                  />
+                </div>
+              )}
             </div>
-            <div className="mt-4 space-x-2">
-              <button 
-                onClick={() => setShowReviewForm(true)} 
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300"
-              >
-                更新评论
-              </button>
-              <button 
-                onClick={handleDeleteReview} 
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
-              >
-                删除评论
-              </button>
-            </div>
-          </div>
+          ))
         ) : (
-          <div>
-            <p className="text-gray-600">暂无评论</p>
-            <button 
-              onClick={() => setShowReviewForm(true)} 
-              className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300"
-            >
-              添加评论
-            </button>
-          </div>
-        )}
-        {showReviewForm && (
-          <div className="mt-6">
-            <ReviewForm
-              mediaId={parseInt(id!)}
-              initialReview={review || undefined}
-              onReviewSubmit={handleReviewSubmit}
-              onCancel={() => setShowReviewForm(false)}
-            />
-          </div>
+          <p className="text-gray-600">暂无评论</p>
         )}
       </div>
     </div>
