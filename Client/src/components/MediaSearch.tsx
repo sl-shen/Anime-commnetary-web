@@ -20,23 +20,35 @@ const MediaSearch: React.FC<{ onAddMedia: () => void }> = ({ onAddMedia }) => {
   const [query, setQuery] = useState('');
   const [mediaType, setMediaType] = useState(2); // 默认为动画
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
+    setError(null);
+    setLoading(true);
     try {
       const response = await searchMedia(query, mediaType);
       setResults(response.data);
     } catch (error) {
       console.error('Search failed', error);
+      setError('搜索失败，请稍后重试');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleAdd = async (bangumiId: number) => {
+    setError(null);
+    setLoading(true);
     try {
       await addMedia(bangumiId);
       alert('Media added to your library');
-      onAddMedia(); 
+      onAddMedia();
     } catch (error) {
       console.error('Failed to add media', error);
+      setError('无法添加到库，请稍后重试');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,10 +71,15 @@ const MediaSearch: React.FC<{ onAddMedia: () => void }> = ({ onAddMedia }) => {
             <option key={type.id} value={type.id}>{type.name}</option>
           ))}
         </select>
-        <button onClick={handleSearch} className="p-2 bg-blue-500 text-white rounded">
-          搜索
+        <button 
+          onClick={handleSearch} 
+          className="p-2 bg-blue-500 text-white rounded"
+          disabled={loading}
+        >
+          {loading ? '搜索中...' : '搜索'}
         </button>
       </div>
+      {error && <div className="text-red-500">{error}</div>}
       <div className="space-y-4">
         {results.map((result) => (
           <div key={result.id} className="flex space-x-4 bg-white p-4 rounded-lg shadow">
@@ -73,8 +90,9 @@ const MediaSearch: React.FC<{ onAddMedia: () => void }> = ({ onAddMedia }) => {
               <button
                 onClick={() => handleAdd(result.id)}
                 className="mt-2 px-4 py-2 bg-green-500 text-white rounded"
+                disabled={loading}
               >
-                添加到库
+                {loading ? '添加中...' : '添加到库'}
               </button>
             </div>
           </div>
