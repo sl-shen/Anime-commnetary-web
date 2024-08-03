@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReviewForm from '../components/ReviewForm';
 import axios from 'axios';
+import { formatInTimeZone } from 'date-fns-tz';
 
 interface Media {
   id: number;
@@ -17,6 +18,7 @@ interface Review {
   text: string;
   rating: number;
   user_id: number;
+  created_at: string;
 }
 
 const mediaTypes = [
@@ -116,6 +118,12 @@ const MediaDetail: React.FC = () => {
     return mediaType ? mediaType.name : '其他类型';
   };
 
+  const formatDate = (dateString: string) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const utcDate = new Date(dateString + 'Z'); // 'Z' -- UTC 时间
+    return formatInTimeZone(utcDate, userTimeZone, 'yyyy年MM月dd日 HH:mm');
+  };
+
   if (loading) return <div className="flex justify-center items-center h-screen">加载中...</div>;
   if (error) return <div className="text-red-500 text-center mt-10">{error}</div>;
   if (!media) return <div className="text-center mt-10">未找到媒体信息</div>;
@@ -175,11 +183,14 @@ const MediaDetail: React.FC = () => {
         {reviews.length > 0 ? (
           reviews.map((review) => (
             <div key={review.id} className="mb-6 bg-gray-100 p-4 rounded-lg">
-              <div className="flex items-center mb-2">
-                <span className="text-xl font-bold mr-2">评分:</span>
-                <span className="text-2xl text-yellow-500">{review.rating} / 10</span>
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <span className="text-xl font-bold mr-2">评分:</span>
+                  <span className="text-2xl text-yellow-500">{review.rating} / 10</span>
+                </div>
+                <span className="text-sm text-gray-500">{formatDate(review.created_at)}</span>
               </div>
-              <p className="text-gray-700"><span className="font-bold">评论:</span> {review.text}</p>
+              <p className="text-gray-700 mb-4"><span className="font-bold">评论:</span> {review.text}</p>
               <div className="mt-4 space-x-2">
                 <button 
                   onClick={() => setEditingReviewId(review.id)} 

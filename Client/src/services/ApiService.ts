@@ -42,8 +42,8 @@ export const login = (username: string, password: string) => {
   });
 };
 
-export const register = (username: string, email: string, password: string) =>
-  api.post('/register', { username, email, password });
+// export const register = (username: string, email: string, password: string) =>
+//   api.post('/register', { username, email, password });
 
 export const searchMedia = (query: string, mediaType: number) =>
   api.get(`/bangumi/search/${mediaType}/${query}`);

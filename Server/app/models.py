@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from .database import Base
 
 class User(Base):
@@ -35,6 +36,7 @@ class Review(Base):
     rating = Column(Integer)
     user_id = Column(Integer, ForeignKey("users.id"))
     media_id = Column(Integer, ForeignKey("user_media.id"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="reviews")
     media = relationship("UserMedia", back_populates="reviews")
