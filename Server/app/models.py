@@ -1,8 +1,83 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
 
+group_members = Table('group_members', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('group_id', Integer, ForeignKey('groups.id'))
+)
+
+class Group(Base):
+    __tablename__ = "groups"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    description = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    owner_id = Column(Integer, ForeignKey("users.id"))
+
+    owner = relationship("User", back_populates="owned_groups")
+    members = relationship("User", secondary=group_members, back_populates="groups")
+    media = relationship("GroupMedia", back_populates="group")
+    discussions = relationship("Discussion", back_populates="group")
+
+class GroupMedia(Base):
+    __tablename__ = "group_media"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
+    image = Column(String)
+    summary = Column(String)
+    bangumi_id = Column(Integer)
+    media_type = Column(Integer)
+    group_id = Column(Integer, ForeignKey("groups.id"))
+    added_by_id = Column(Integer, ForeignKey("users.id"))
+
+    group = relationship("Group", back_populates="media")
+    added_by = relationship("User")
+    reviews = relationship("GroupReview", back_populates="media")
+
+class GroupReview(Base):
+    __tablename__ = "group_reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    text = Column(String)
+    rating = Column(Integer)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    media_id = Column(Integer, ForeignKey("group_media.id"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="group_reviews")
+    media = relationship("GroupMedia", back_populates="reviews")
+
+class Discussion(Base):
+    __tablename__ = "discussions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
+    content = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    user_id = Column(Integer, ForeignKey("users.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"))
+    media_id = Column(Integer, ForeignKey("group_media.id"))
+
+    user = relationship("User", back_populates="discussions")
+    group = relationship("Group", back_populates="discussions")
+    media = relationship("GroupMedia")
+    comments = relationship("Comment", back_populates="discussion")
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    user_id = Column(Integer, ForeignKey("users.id"))
+    discussion_id = Column(Integer, ForeignKey("discussions.id"))
+
+    user = relationship("User", back_populates="comments")
+    discussion = relationship("Discussion", back_populates="comments")
 class User(Base):
     __tablename__ = "users"
 
@@ -13,6 +88,11 @@ class User(Base):
 
     media = relationship("UserMedia", back_populates="user")
     reviews = relationship("Review", back_populates="user")
+    owned_groups = relationship("Group", back_populates="owner")
+    groups = relationship("Group", secondary=group_members, back_populates="members")
+    group_reviews = relationship("GroupReview", back_populates="user")
+    discussions = relationship("Discussion", back_populates="user")
+    comments = relationship("Comment", back_populates="user")
 
 class UserMedia(Base):
     __tablename__ = "user_media"
@@ -40,3 +120,4 @@ class Review(Base):
 
     user = relationship("User", back_populates="reviews")
     media = relationship("UserMedia", back_populates="reviews")
+

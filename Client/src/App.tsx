@@ -8,6 +8,9 @@ import Home from './pages/HomePage';
 import Library from './pages/LibraryPage';
 import MediaDetail from './pages/MediaDetailPage';
 import Settings from './pages/SettingPage';
+import GroupLibrary from './components/GroupLibrary';
+import GroupDetail from './components/GroupDetail';
+import GroupMediaDetail from './pages/GroupMediaDetailPage'; 
 
 const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
   const { isAuthenticated } = useAuth();
@@ -27,6 +30,9 @@ const AppRoutes: React.FC = () => {
           <Route path="/home" element={<PrivateRoute element={<Home />} />} />
           <Route path="/library" element={<PrivateRoute element={<Library />} />} />
           <Route path="/media/:id" element={<PrivateRoute element={<MediaDetail />} />} />
+          <Route path="/groups" element={<GroupLibrary />} />
+          <Route path="/groups/:id" element={<GroupDetail />} />
+          <Route path="/groups/:groupId/media/:mediaId" element={<GroupMediaDetail />} />
           <Route path="/settings" element={<PrivateRoute element={<Settings />} />} />
           <Route path="/" element={<Navigate replace to={isAuthenticated ? "/home" : "/login"} />} />
         </Routes>

@@ -74,3 +74,114 @@ class Review(ReviewBase):
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
+
+class GroupBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class GroupCreate(GroupBase):
+    pass
+
+class Group(GroupBase):
+    id: int
+    created_at: datetime
+    owner_id: int
+
+    class Config:
+        orm_mode = True
+
+class GroupMediaBase(BaseModel):
+    title: str
+    image: Optional[str] = None
+    summary: Optional[str] = None
+    bangumi_id: int
+    media_type: int
+
+class GroupMediaCreate(BaseModel):
+    title: str
+    image: str
+    summary: str
+    bangumi_id: int
+    media_type: int
+    
+class GroupMedia(GroupMediaBase):
+    id: int
+    group_id: int
+    added_by_id: int
+
+    class Config:
+        orm_mode = True
+
+class GroupReviewBase(BaseModel):
+    text: str
+    rating: int
+
+class GroupReviewCreate(GroupReviewBase):
+    pass
+
+class GroupReview(GroupReviewBase):
+    id: int
+    user_id: int
+    media_id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+class DiscussionBase(BaseModel):
+    title: str
+    content: str
+
+class DiscussionCreate(DiscussionBase):
+    pass
+
+class Discussion(DiscussionBase):
+    id: int
+    created_at: datetime
+    user_id: int
+    group_id: int
+    media_id: int
+
+    class Config:
+        orm_mode = True
+
+class CommentBase(BaseModel):
+    content: str
+
+class CommentCreate(CommentBase):
+    pass
+
+class Comment(CommentBase):
+    id: int
+    created_at: datetime
+    user_id: int
+    discussion_id: int
+
+    class Config:
+        orm_mode = True
+
+class UserBase(BaseModel):
+    username: str
+    email: str
+
+class UserCreate(UserBase):
+    password: str
+
+class User(UserBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+        
+class UserInvite(BaseModel):
+    username: str
+
+class Message(BaseModel):
+    message: str
+
+class GroupReviewUpdate(BaseModel):
+    text: Optional[str] = None
+    rating: Optional[int] = None
+
+class Message(BaseModel):
+    message: str

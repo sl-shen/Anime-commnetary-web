@@ -15,6 +15,7 @@ const Sidebar: React.FC = () => {
           <>
             <Link to="/home" className="block py-2 px-4 hover:bg-gray-700 transition duration-150">Home</Link>
             <Link to="/library" className="block py-2 px-4 hover:bg-gray-700 transition duration-150">Library</Link>
+            <Link to="/groups"className="block py-2 px-4 hover:bg-gray-700 transition duration-150">Group</Link>
             <Link to="/settings" className="block py-2 px-4 hover:bg-gray-700 transition duration-150">Settings</Link>
           </>
         ) : (

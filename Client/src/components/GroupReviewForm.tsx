@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-interface ReviewFormProps {
+interface GroupReviewFormProps {
+  groupId: number;
   mediaId: number;
   initialReview?: { id: number; text: string; rating: number };
   onReviewSubmit: () => void;
   onCancel: () => void;
 }
 
-const ReviewForm: React.FC<ReviewFormProps> = ({ mediaId, initialReview, onReviewSubmit, onCancel }) => {
+const GroupReviewForm: React.FC<GroupReviewFormProps> = ({ groupId, mediaId, initialReview, onReviewSubmit, onCancel }) => {
   const [text, setText] = useState('');
   const [rating, setRating] = useState(0);
   const [error, setError] = useState('');
@@ -30,17 +31,17 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ mediaId, initialReview, onRevie
     }
 
     try {
-      const token = localStorage.getItem('token'); 
+      const token = localStorage.getItem('token');
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };
 
       if (initialReview) {
         console.log('Sending update data:', { text, rating });
-        await axios.put(`http://localhost:8000/reviews/update/${initialReview.id}`, { text, rating }, config);
+        await axios.put(`http://localhost:8000/groups/${groupId}/reviews/update/${initialReview.id}`, { text, rating }, config);
       } else {
         console.log('Sending add data:', { text, rating });
-        await axios.post(`http://localhost:8000/reviews/add/${mediaId}`, { text, rating }, config);
+        await axios.post(`http://localhost:8000/groups/${groupId}/media/${mediaId}/review`, { text, rating }, config);
       }
       onReviewSubmit();
       if (!initialReview) {
@@ -79,6 +80,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ mediaId, initialReview, onRevie
           className="mt-1 block w-full p-2 border rounded"
         />
       </div>
+      {error && <p className="text-red-500">{error}</p>}
       <div className="flex space-x-2">
         <button type="submit" className="flex-1 p-2 bg-blue-500 text-white rounded">
           {initialReview ? '更新评论' : '添加评论'}
@@ -91,4 +93,4 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ mediaId, initialReview, onRevie
   );
 };
 
-export default ReviewForm;
+export default GroupReviewForm;

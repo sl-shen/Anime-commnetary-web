@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 interface Media {
   id: number;
@@ -9,13 +9,20 @@ interface Media {
 
 interface MediaListProps {
   media: Media[];
+  isGroupMedia?: boolean;
 }
 
-const MediaList: React.FC<MediaListProps> = ({ media }) => {
+const MediaList: React.FC<MediaListProps> = ({ media, isGroupMedia = false }) => {
+  const { id: groupId } = useParams<{ id: string }>();
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
       {media.map((item) => (
-        <Link to={`/media/${item.id}`} key={item.id} className="block group">
+        <Link 
+          to={isGroupMedia ? `/groups/${groupId}/media/${item.id}` : `/media/${item.id}`} 
+          key={item.id} 
+          className="block group"
+        >
           <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 transform group-hover:scale-105">
             <div className="relative">
               <img src={item.image} alt={item.title} className="w-full h-64 object-cover" />

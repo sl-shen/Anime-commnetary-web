@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from . import models, schemas
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
+from typing import List
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -96,3 +97,191 @@ def get_media_reviews(db: Session, media_id: int, skip: int = 0, limit: int = 10
 # 获取用户的所有评论
 def get_user_reviews(db: Session, user_id: int, skip: int = 0, limit: int = 100):
     return db.query(models.Review).filter(models.Review.user_id == user_id).offset(skip).limit(limit).all()
+
+# ------------------------------------------------------------------------------------------------------------
+
+def create_group(db: Session, group: schemas.GroupCreate, user_id: int):
+    db_group = models.Group(**group.dict(), owner_id=user_id)
+    db_group.members.append(db.query(models.User).get(user_id))
+    db.add(db_group)
+    db.commit()
+    db.refresh(db_group)
+    return db_group
+
+def get_group(db: Session, group_id: int):
+    return db.query(models.Group).options(
+        joinedload(models.Group.members),
+        joinedload(models.Group.owner)
+    ).filter(models.Group.id == group_id).first()
+
+def get_user_groups(db: Session, user_id: int):
+    return db.query(models.Group).filter(models.Group.members.any(id=user_id)).all()
+
+def get_group(db: Session, group_id: int):
+    return db.query(models.Group).options(joinedload(models.Group.members)).filter(models.Group.id == group_id).first()
+
+def invite_user_to_group(db: Session, group_id: int, user_id: int, inviter_id: int):
+    group = db.query(models.Group).filter(models.Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    if group.owner_id != inviter_id:
+        raise HTTPException(status_code=403, detail="Only the group owner can invite users")
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user in group.members:
+        raise HTTPException(status_code=400, detail="User is already a member of this group")
+    group.members.append(user)
+    db.commit()
+    db.refresh(group)
+    return group
+
+def remove_group_member(db: Session, group_id: int, member_id: int):
+    group = db.query(models.Group).filter(models.Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    member = db.query(models.User).filter(models.User.id == member_id).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    if member not in group.members:
+        raise HTTPException(status_code=400, detail="User is not a member of this group")
+    
+    group.members.remove(member)
+    db.commit()
+    db.refresh(group)
+    return group
+
+def add_media_to_group(db: Session, group_id: int, media: schemas.GroupMediaCreate, user_id: int):
+    group = db.query(models.Group).filter(models.Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    if user_id not in [member.id for member in group.members]:
+        raise HTTPException(status_code=403, detail="User is not a member of this group")
+    db_media = models.GroupMedia(**media.dict(), group_id=group_id, added_by_id=user_id)
+    db.add(db_media)
+    db.commit()
+    db.refresh(db_media)
+    return db_media
+
+def add_review_to_group_media(db: Session, group_id: int, media_id: int, review: schemas.GroupReviewCreate, user_id: int):
+    group = db.query(models.Group).filter(models.Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    if user_id not in [member.id for member in group.members]:
+        raise HTTPException(status_code=403, detail="User is not a member of this group")
+    media = db.query(models.GroupMedia).filter(models.GroupMedia.id == media_id, models.GroupMedia.group_id == group_id).first()
+    if not media:
+        raise HTTPException(status_code=404, detail="Media not found in this group")
+    db_review = models.GroupReview(**review.dict(), user_id=user_id, media_id=media_id)
+    db.add(db_review)
+    db.commit()
+    db.refresh(db_review)
+    return db_review
+
+def create_discussion(db: Session, group_id: int, media_id: int, discussion: schemas.DiscussionCreate, user_id: int):
+    group = db.query(models.Group).filter(models.Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    if user_id not in [member.id for member in group.members]:
+        raise HTTPException(status_code=403, detail="User is not a member of this group")
+    media = db.query(models.GroupMedia).filter(models.GroupMedia.id == media_id, models.GroupMedia.group_id == group_id).first()
+    if not media:
+        raise HTTPException(status_code=404, detail="Media not found in this group")
+    db_discussion = models.Discussion(**discussion.dict(), user_id=user_id, group_id=group_id, media_id=media_id)
+    db.add(db_discussion)
+    db.commit()
+    db.refresh(db_discussion)
+    return db_discussion
+
+def add_comment_to_discussion(db: Session, discussion_id: int, comment: schemas.CommentCreate, user_id: int):
+    discussion = db.query(models.Discussion).filter(models.Discussion.id == discussion_id).first()
+    if not discussion:
+        raise HTTPException(status_code=404, detail="Discussion not found")
+    group = db.query(models.Group).filter(models.Group.id == discussion.group_id).first()
+    if user_id not in [member.id for member in group.members]:
+        raise HTTPException(status_code=403, detail="User is not a member of this group")
+    db_comment = models.Comment(**comment.dict(), user_id=user_id, discussion_id=discussion_id)
+    db.add(db_comment)
+    db.commit()
+    db.refresh(db_comment)
+    return db_comment
+
+def sync_media_to_group(db: Session, group_id: int, media_ids: List[int], user_id: int):
+    group = db.query(models.Group).filter(models.Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    if user_id not in [member.id for member in group.members]:
+        raise HTTPException(status_code=403, detail="User is not a member of this group")
+    
+    synced_media = []
+    for media_id in media_ids:
+        user_media = db.query(models.UserMedia).filter(models.UserMedia.id == media_id, models.UserMedia.user_id == user_id).first()
+        if user_media:
+            group_media = models.GroupMedia(
+                title=user_media.title,
+                image=user_media.image,
+                summary=user_media.summary,
+                bangumi_id=user_media.bangumi_id,
+                media_type=user_media.media_type,
+                group_id=group_id,
+                added_by_id=user_id
+            )
+            db.add(group_media)
+            synced_media.append(group_media)
+    
+    db.commit()
+    for media in synced_media:
+        db.refresh(media)
+    
+    return synced_media
+
+def delete_group(db: Session, group_id: int):
+    group = db.query(models.Group).filter(models.Group.id == group_id).first()
+    if group:
+        db.delete(group)
+        db.commit()
+    return group
+
+def get_group_media_detail(db: Session, group_id: int, media_id: int):
+    return db.query(models.GroupMedia).filter(models.GroupMedia.id == media_id, models.GroupMedia.group_id == group_id).first()
+
+def update_group_review(db: Session, group_id: int, review_id: int, review: schemas.GroupReviewUpdate, user_id: int):
+    db_review = db.query(models.GroupReview).filter(
+        models.GroupReview.id == review_id,
+        models.GroupReview.user_id == user_id
+    ).first()
+    if db_review:
+        for key, value in review.dict(exclude_unset=True).items():
+            setattr(db_review, key, value)
+        db.commit()
+        db.refresh(db_review)
+    return db_review
+
+def delete_group_review(db: Session, group_id: int, review_id: int, user_id: int):
+    db_review = db.query(models.GroupReview).filter(
+        models.GroupReview.id == review_id,
+        models.GroupReview.user_id == user_id
+    ).first()
+    if db_review:
+        db.delete(db_review)
+        db.commit()
+        return True
+    return False
+
+def delete_group_media(db: Session, group_id: int, media_id: int, user_id: int):
+    group = db.query(models.Group).filter(models.Group.id == group_id).first()
+    if group and group.owner_id == user_id:
+        db_media = db.query(models.GroupMedia).filter(
+            models.GroupMedia.id == media_id,
+            models.GroupMedia.group_id == group_id
+        ).first()
+        if db_media:
+            db.delete(db_media)
+            db.commit()
+            return True
+    return False
+
+def get_group_media_reviews(db: Session, group_id: int, media_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.GroupReview).join(models.GroupMedia).filter(models.GroupMedia.group_id == group_id, models.GroupMedia.id == media_id).offset(skip).limit(limit).all()
