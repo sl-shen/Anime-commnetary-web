@@ -165,19 +165,23 @@ def add_media_to_group(db: Session, group_id: int, media: schemas.GroupMediaCrea
     db.refresh(db_media)
     return db_media
 
-def add_review_to_group_media(db: Session, group_id: int, media_id: int, review: schemas.GroupReviewCreate, user_id: int):
+def add_review_to_group_media(db: Session, group_id: int, media_id: int, review: schemas.GroupReviewCreate, user_id: int, username: str):
     group = db.query(models.Group).filter(models.Group.id == group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
+    
     if user_id not in [member.id for member in group.members]:
         raise HTTPException(status_code=403, detail="User is not a member of this group")
+    
     media = db.query(models.GroupMedia).filter(models.GroupMedia.id == media_id, models.GroupMedia.group_id == group_id).first()
     if not media:
         raise HTTPException(status_code=404, detail="Media not found in this group")
-    db_review = models.GroupReview(**review.dict(), user_id=user_id, media_id=media_id)
+    
+    db_review = models.GroupReview(**review.dict(), user_id=user_id, media_id=media_id, username=username)
     db.add(db_review)
     db.commit()
     db.refresh(db_review)
+    
     return db_review
 
 def create_discussion(db: Session, group_id: int, media_id: int, discussion: schemas.DiscussionCreate, user_id: int):
@@ -284,4 +288,7 @@ def delete_group_media(db: Session, group_id: int, media_id: int, user_id: int):
     return False
 
 def get_group_media_reviews(db: Session, group_id: int, media_id: int, skip: int = 0, limit: int = 100):
-    return db.query(models.GroupReview).join(models.GroupMedia).filter(models.GroupMedia.group_id == group_id, models.GroupMedia.id == media_id).offset(skip).limit(limit).all()
+    reviews = db.query(models.GroupReview).join(models.GroupMedia)\
+                .filter(models.GroupMedia.group_id == group_id, models.GroupReview.media_id == media_id)\
+                .offset(skip).limit(limit).all()
+    return reviews

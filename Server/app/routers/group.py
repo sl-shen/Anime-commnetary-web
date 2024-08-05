@@ -4,6 +4,7 @@ from typing import List
 from .. import crud, models, schemas
 from ..database import get_db
 from ..auth import get_current_user
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter()
 
@@ -46,8 +47,22 @@ def add_media_to_group(group_id: int, media: schemas.GroupMediaCreate, db: Sessi
     return crud.add_media_to_group(db=db, group_id=group_id, media=media, user_id=current_user.id)
 
 @router.post("/{group_id}/media/{media_id}/review", response_model=schemas.GroupReview)
-def add_review_to_group_media(group_id: int, media_id: int, review: schemas.GroupReviewCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    return crud.add_review_to_group_media(db=db, group_id=group_id, media_id=media_id, review=review, user_id=current_user.id)
+def add_review_to_group_media(
+    group_id: int, 
+    media_id: int, 
+    review: schemas.GroupReviewCreate, 
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(get_current_user)
+):
+    db_review = crud.add_review_to_group_media(
+        db=db, 
+        group_id=group_id, 
+        media_id=media_id, 
+        review=review, 
+        user_id=current_user.id,
+        username=current_user.username
+    )
+    return schemas.GroupReview.from_orm(db_review)
 
 @router.post("/{group_id}/media/{media_id}/discussion", response_model=schemas.Discussion)
 def create_discussion(group_id: int, media_id: int, discussion: schemas.DiscussionCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
@@ -80,9 +95,14 @@ def get_group_media(group_id: int, db: Session = Depends(get_db), current_user: 
     return group.media
 
 @router.get("/{group_id}/media/{media_id}/reviews", response_model=List[schemas.GroupReview])
-def get_group_media_reviews(group_id: int, media_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def get_group_media_reviews(
+    group_id: int, 
+    media_id: int, 
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(get_current_user)
+):
     reviews = crud.get_group_media_reviews(db, group_id, media_id)
-    return reviews
+    return [schemas.GroupReview.model_validate(jsonable_encoder(review)) for review in reviews]
 
 @router.get("/{group_id}/media/{media_id}/discussions", response_model=List[schemas.Discussion])
 def get_group_media_discussions(group_id: int, media_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):

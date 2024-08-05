@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -119,14 +119,16 @@ class GroupReviewBase(BaseModel):
 class GroupReviewCreate(GroupReviewBase):
     pass
 
+
 class GroupReview(GroupReviewBase):
     id: int
     user_id: int
+    username: str
     media_id: int
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 class DiscussionBase(BaseModel):
     title: str

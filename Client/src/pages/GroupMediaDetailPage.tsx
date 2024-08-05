@@ -19,6 +19,7 @@ interface Review {
   rating: number;
   user_id: number;
   created_at: string;
+  username: string;
 }
 
 const mediaTypes = [
@@ -194,7 +195,10 @@ const GroupMediaDetail: React.FC = () => {
                   <span className="text-xl font-bold mr-2">评分:</span>
                   <span className="text-2xl text-yellow-500">{review.rating} / 10</span>
                 </div>
-                <span className="text-sm text-gray-500">{formatDate(review.created_at)}</span>
+                <div className="text-right">
+                  <div className="text-sm text-gray-500">{formatDate(review.created_at)}</div>
+                  <div className="text-sm text-gray-600">by {review.username}</div>
+                </div>
               </div>
               <p className="text-gray-700 mb-4"><span className="font-bold">评论:</span> {review.text}</p>
               <div className="mt-4 space-x-2">

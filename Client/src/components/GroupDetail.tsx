@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import axios, { AxiosError }  from 'axios';
 import MediaList from '../components/MediaList';
 import GroupMediaSearch from '../components/GroupMediaSearch';
 
@@ -80,9 +80,19 @@ const GroupDetail: React.FC = () => {
       );
       setNewMemberUsername('');
       fetchGroupDetails();
-    } catch (error) {
+      setError('');
+    } catch (error: unknown) {
       console.error('Failed to add member', error);
-      setError('Failed to add member. Please try again.');
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response && axiosError.response.status === 404) {
+          setError('User not found. Please check the username and try again.');
+        } else {
+          setError('Failed to add member. Please try again.');
+        }
+      } else {
+        setError('An unknown error occurred. Please try again.');
+      }
     }
   };
 

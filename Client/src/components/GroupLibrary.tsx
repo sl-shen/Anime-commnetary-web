@@ -25,6 +25,7 @@ const GroupLibrary: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setGroups(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error('Failed to fetch groups', error);
     }

@@ -47,6 +47,7 @@ class GroupReview(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     media_id = Column(Integer, ForeignKey("group_media.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    username = Column(String)
 
     user = relationship("User", back_populates="group_reviews")
     media = relationship("GroupMedia", back_populates="reviews")
@@ -78,6 +79,7 @@ class Comment(Base):
 
     user = relationship("User", back_populates="comments")
     discussion = relationship("Discussion", back_populates="comments")
+
 class User(Base):
     __tablename__ = "users"
 
