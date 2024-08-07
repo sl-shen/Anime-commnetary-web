@@ -4,12 +4,20 @@ import axios from 'axios';
 interface GroupReviewFormProps {
   groupId: number;
   mediaId: number;
-  initialReview?: { id: number; text: string; rating: number };
+  initialReview?: { id: number; text: string; rating: number; user_id: number };
+  currentUserId: number;
   onReviewSubmit: () => void;
   onCancel: () => void;
 }
 
-const GroupReviewForm: React.FC<GroupReviewFormProps> = ({ groupId, mediaId, initialReview, onReviewSubmit, onCancel }) => {
+const GroupReviewForm: React.FC<GroupReviewFormProps> = ({ 
+  groupId, 
+  mediaId, 
+  initialReview, 
+  currentUserId,
+  onReviewSubmit, 
+  onCancel 
+}) => {
   const [text, setText] = useState('');
   const [rating, setRating] = useState(0);
   const [error, setError] = useState('');
@@ -37,6 +45,10 @@ const GroupReviewForm: React.FC<GroupReviewFormProps> = ({ groupId, mediaId, ini
       };
 
       if (initialReview) {
+        if (initialReview.user_id !== currentUserId) {
+          setError('您没有权限更新这条评论');
+          return;
+        }
         console.log('Sending update data:', { text, rating });
         await axios.put(`http://localhost:8000/groups/${groupId}/reviews/update/${initialReview.id}`, { text, rating }, config);
       } else {
@@ -58,6 +70,11 @@ const GroupReviewForm: React.FC<GroupReviewFormProps> = ({ groupId, mediaId, ini
       }
     }
   };
+
+  // 如果是更新评论，且当前用户不是评论的作者，则不显示表单
+  if (initialReview && initialReview.user_id !== currentUserId) {
+    return null;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

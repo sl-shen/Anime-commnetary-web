@@ -14,7 +14,17 @@ def create_group(group: schemas.GroupCreate, db: Session = Depends(get_db), curr
 
 @router.get("/get", response_model=List[schemas.Group])
 def get_user_groups(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    return crud.get_user_groups(db=db, user_id=current_user.id)
+    groups = crud.get_user_groups(db=db, user_id=current_user.id)
+    return [
+        schemas.Group(
+            id=group.id,
+            name=group.name,
+            description=group.description,
+            owner_id=group.owner_id,
+            created_at=group.created_at,
+            owner_name=group.owner.username if group.owner else None
+        ) for group in groups
+    ]
 
 @router.post("/{group_id}/invite", response_model=schemas.Group)
 def invite_user_to_group(
@@ -26,7 +36,8 @@ def invite_user_to_group(
     user = db.query(models.User).filter(models.User.username == user_invite.username).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return crud.invite_user_to_group(db=db, group_id=group_id, user_id=user.id, inviter_id=current_user.id)
+    group_data = crud.invite_user_to_group(db=db, group_id=group_id, user_id=user.id, inviter_id=current_user.id)
+    return schemas.Group(**group_data)
 
 @router.delete("/{group_id}/members/{member_id}", response_model=schemas.Group)
 def remove_group_member(
@@ -40,7 +51,9 @@ def remove_group_member(
         raise HTTPException(status_code=404, detail="Group not found")
     if current_user.id != group.owner_id:
         raise HTTPException(status_code=403, detail="Only the group owner can remove members")
-    return crud.remove_group_member(db, group_id, member_id)
+    updated_group = crud.remove_group_member(db, group_id, member_id)
+    return schemas.Group(**updated_group)
+
 
 @router.post("/{group_id}/media", response_model=schemas.GroupMedia)
 def add_media_to_group(group_id: int, media: schemas.GroupMediaCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
@@ -83,7 +96,15 @@ def get_group(group_id: int, db: Session = Depends(get_db), current_user: models
         raise HTTPException(status_code=404, detail="Group not found")
     if current_user.id not in [member.id for member in group.members]:
         raise HTTPException(status_code=403, detail="Not a member of this group")
-    return group
+    group_data = {
+        "id": group.id,
+        "name": group.name,
+        "description": group.description,
+        "created_at": group.created_at,
+        "owner_id": group.owner_id,
+        "owner_name": group.owner.username 
+    }
+    return schemas.Group(**group_data)
 
 @router.get("/{group_id}/media", response_model=List[schemas.GroupMedia])
 def get_group_media(group_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):

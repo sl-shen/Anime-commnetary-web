@@ -86,6 +86,7 @@ class Group(GroupBase):
     id: int
     created_at: datetime
     owner_id: int
+    owner_name: str
 
     class Config:
         orm_mode = True

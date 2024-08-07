@@ -115,10 +115,10 @@ def get_group(db: Session, group_id: int):
     ).filter(models.Group.id == group_id).first()
 
 def get_user_groups(db: Session, user_id: int):
-    return db.query(models.Group).filter(models.Group.members.any(id=user_id)).all()
-
-def get_group(db: Session, group_id: int):
-    return db.query(models.Group).options(joinedload(models.Group.members)).filter(models.Group.id == group_id).first()
+    return db.query(models.Group) \
+             .options(joinedload(models.Group.owner)) \
+             .filter(models.Group.members.any(id=user_id)) \
+             .all()
 
 def invite_user_to_group(db: Session, group_id: int, user_id: int, inviter_id: int):
     group = db.query(models.Group).filter(models.Group.id == group_id).first()
@@ -134,7 +134,14 @@ def invite_user_to_group(db: Session, group_id: int, user_id: int, inviter_id: i
     group.members.append(user)
     db.commit()
     db.refresh(group)
-    return group
+    return {
+        "id": group.id,
+        "name": group.name,
+        "description": group.description,
+        "created_at": group.created_at,
+        "owner_id": group.owner_id,
+        "owner_name": group.owner.username,
+    }
 
 def remove_group_member(db: Session, group_id: int, member_id: int):
     group = db.query(models.Group).filter(models.Group.id == group_id).first()
@@ -151,7 +158,14 @@ def remove_group_member(db: Session, group_id: int, member_id: int):
     group.members.remove(member)
     db.commit()
     db.refresh(group)
-    return group
+    return {
+        "id": group.id,
+        "name": group.name,
+        "description": group.description,
+        "created_at": group.created_at,
+        "owner_id": group.owner_id,
+        "owner_name": group.owner.username,
+    }
 
 def add_media_to_group(db: Session, group_id: int, media: schemas.GroupMediaCreate, user_id: int):
     group = db.query(models.Group).filter(models.Group.id == group_id).first()
