@@ -61,7 +61,7 @@ const GroupMediaDetail: React.FC = () => {
       });
       setMedia(response.data);
     } catch (error) {
-      console.error('Failed to fetch media details', error);
+      //console.error('Failed to fetch media details', error);
       setError('获取媒体详情失败');
     } finally {
       setLoading(false);
@@ -80,7 +80,7 @@ const GroupMediaDetail: React.FC = () => {
         setReviews([]);
       }
     } catch (error) {
-      console.error('Failed to fetch reviews', error);
+      //console.error('Failed to fetch reviews', error);
       setReviews([]);
     }
   };
@@ -105,11 +105,11 @@ const GroupMediaDetail: React.FC = () => {
 
   const handleDeleteReview = async (reviewId: number, reviewUserId: number) => {
     if (currentUser?.id !== reviewUserId) {
-      setError('您没有权限删除这条评论');
+      alert('Only the reviewer can delete it.');
       return;
     }
 
-    const confirmDelete = window.confirm("确定要删除这个评论吗？此操作不可撤销。");
+    const confirmDelete = window.confirm("Are you sure you want to remove this review?");
     if (!confirmDelete) return;
 
     try {
@@ -117,18 +117,18 @@ const GroupMediaDetail: React.FC = () => {
       await axios.delete(`http://localhost:8000/groups/${groupId}/reviews/${reviewId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log("Review deleted successfully");
+      //console.log("Review deleted successfully");
       fetchReviews();
     } catch (error) {
-      console.error('Failed to delete review', error);
-      setError('删除评论失败');
+      //console.error('Failed to delete review', error);
+      alert('删除评论失败');
     }
   };
 
   const handleDeleteMedia = async () => {
     if (!media) return;
 
-    const confirmDelete = window.confirm("确定要删除这个媒体吗？此操作不可撤销。");
+    const confirmDelete = window.confirm("Are you sure you want to remove this media?");
     if (!confirmDelete) return;
 
     try {
@@ -136,11 +136,19 @@ const GroupMediaDetail: React.FC = () => {
       await axios.delete(`http://localhost:8000/groups/${groupId}/media/${mediaId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log("Media deleted successfully");
+      //console.log("Media deleted successfully");
       navigate(`/groups/${groupId}`);
     } catch (error) {
-      console.error('Failed to delete media', error);
-      setError('删除媒体失败');
+      //console.error('Failed to delete media', error);
+      if (axios.isAxiosError(error) && error.response) {
+        if (error.response.status === 403) {
+          alert('Only the group creator can delete media.');
+        } else {
+          alert(error.response.data.detail || 'Failed to delete media');
+        }
+      } else {
+        alert('发生未知错误');
+      }
     }
   };
 

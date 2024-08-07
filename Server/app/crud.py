@@ -290,16 +290,23 @@ def delete_group_review(db: Session, group_id: int, review_id: int, user_id: int
 
 def delete_group_media(db: Session, group_id: int, media_id: int, user_id: int):
     group = db.query(models.Group).filter(models.Group.id == group_id).first()
-    if group and group.owner_id == user_id:
-        db_media = db.query(models.GroupMedia).filter(
-            models.GroupMedia.id == media_id,
-            models.GroupMedia.group_id == group_id
-        ).first()
-        if db_media:
-            db.delete(db_media)
-            db.commit()
-            return True
-    return False
+    if not group:
+        return {"status": "error", "message": "Group not found"}
+    
+    if group.owner_id != user_id:
+        return {"status": "error", "message": "Only the group owner can delete media"}
+    
+    db_media = db.query(models.GroupMedia).filter(
+        models.GroupMedia.id == media_id,
+        models.GroupMedia.group_id == group_id
+    ).first()
+    
+    if not db_media:
+        return {"status": "error", "message": "Media not found"}
+    
+    db.delete(db_media)
+    db.commit()
+    return {"status": "success", "message": "Media deleted successfully"}
 
 def get_group_media_reviews(db: Session, group_id: int, media_id: int, skip: int = 0, limit: int = 100):
     reviews = db.query(models.GroupReview).join(models.GroupMedia)\

@@ -39,7 +39,6 @@ const GroupDetail: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [activeTag, setActiveTag] = useState(0);
   const [filteredMedia, setFilteredMedia] = useState<Media[]>([]);
   const [newMemberUsername, setNewMemberUsername] = useState('');
@@ -52,7 +51,6 @@ const GroupDetail: React.FC = () => {
 
   const fetchGroupDetails = async () => {
     setIsLoading(true);
-    setError('');
     try {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
@@ -67,8 +65,8 @@ const GroupDetail: React.FC = () => {
       const membersResponse = await axios.get(`http://localhost:8000/groups/${id}/members`, { headers });
       setMembers(membersResponse.data);
     } catch (error) {
-      console.error('Failed to fetch group details', error);
-      setError('Failed to load group details. Please try again.');
+      //console.error('Failed to fetch group details', error);
+      alert('Failed to load group details. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -93,22 +91,21 @@ const GroupDetail: React.FC = () => {
       );
       setNewMemberUsername('');
       fetchGroupDetails();
-      setError('');
     } catch (error: unknown) {
-      console.error('Failed to add member', error);
+      //console.error('Failed to add member', error);
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError;
         if (axiosError.response && axiosError.response.status === 404) {
-          setError('User not found. Please check the username and try again.');
+          alert('User not found. Please check the username and try again.'); 
         } else if (axiosError.response && axiosError.response.status === 400) {
-          setError('User already in the group.');
+          alert('User already in the group.');
         } else if (axiosError.response && axiosError.response.status === 403) {
-          setError('Only the group creator can add members.');
+          alert('Only the group creator can add members.');
         } else {
-          setError('Failed to add member. Please try again.');
+          alert('Failed to add member. Please try again.');
         }
       } else {
-        setError('An unknown error occurred. Please try again.');
+        alert('An unknown error occurred. Please try again.');
       }
     }
   };
@@ -122,15 +119,15 @@ const GroupDetail: React.FC = () => {
         });
         fetchGroupDetails();
       } catch (error: unknown) {
-        console.error('Failed to remove member', error);
+        //console.error('Failed to remove member', error);
         if (axios.isAxiosError(error)) {
           if (error.response?.status === 403) {
-            setError('Only the group creator can remove members.');
+            alert('Only the group creator can remove members.');
           } else {
-            setError('Failed to remove member. Please try again.');
+            alert('Failed to remove member. Please try again.');
           }
         } else {
-          setError('An unexpected error occurred. Please try again.');
+          alert('An unexpected error occurred. Please try again.');
         }
       }
     }
@@ -179,7 +176,7 @@ const GroupDetail: React.FC = () => {
         </div>
       )}
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+
 
       {!isSearching && (
         <div className="flex space-x-2 mb-4">

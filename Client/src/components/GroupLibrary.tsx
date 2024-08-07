@@ -15,7 +15,6 @@ const GroupLibrary: React.FC = () => {
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupDescription, setNewGroupDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   useEffect(() => {
@@ -24,7 +23,6 @@ const GroupLibrary: React.FC = () => {
 
   const fetchGroups = async () => {
     setIsLoading(true);
-    setError('');
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get('http://localhost:8000/groups/get', {
@@ -32,8 +30,8 @@ const GroupLibrary: React.FC = () => {
       });
       setGroups(response.data);
     } catch (error) {
-      console.error('Failed to fetch groups', error);
-      setError('Failed to load groups. Please try again.');
+      //console.error('Failed to fetch groups', error);
+      alert('Failed to load groups. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +40,7 @@ const GroupLibrary: React.FC = () => {
   const createGroup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newGroupName.trim() === '') {
-      setError('Group name cannot be empty');
+      alert('Group name cannot be empty');
       return;
     }
     try {
@@ -58,8 +56,8 @@ const GroupLibrary: React.FC = () => {
       setShowCreateForm(false);
       fetchGroups();
     } catch (error) {
-      console.error('Failed to create group', error);
-      setError('Failed to create group. Please try again.');
+      //console.error('Failed to create group', error);
+      alert('Failed to create group. Please try again.');
     }
   };
 
@@ -72,11 +70,11 @@ const GroupLibrary: React.FC = () => {
         });
         fetchGroups();
       } catch (error) {
-        console.error('Failed to delete group', error);
+        //console.error('Failed to delete group', error);
         if (axios.isAxiosError(error) && error.response) {
-          setError(error.response.data.detail || 'Failed to delete group');
+          alert(error.response.data.detail || 'Failed to delete group');
         } else {
-          setError('An unexpected error occurred');
+          alert('An unexpected error occurred');
         }
       }
     }
@@ -116,7 +114,6 @@ const GroupLibrary: React.FC = () => {
         </div>
       </div>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
 
       {showCreateForm && (
         <form onSubmit={createGroup} className="mb-6 bg-white p-6 rounded-lg shadow">

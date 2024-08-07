@@ -213,6 +213,6 @@ def delete_group_media(
     current_user: models.User = Depends(get_current_user)
 ):
     result = crud.delete_group_media(db, group_id, media_id, current_user.id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Media not found or you're not authorized to delete it")
-    return {"message": "Media deleted successfully"}
+    if result["status"] == "error":
+        raise HTTPException(status_code=403, detail=result["message"])
+    return {"message": result["message"]}
