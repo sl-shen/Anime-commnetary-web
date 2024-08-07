@@ -24,7 +24,6 @@ const Library: React.FC = () => {
   const [media, setMedia] = useState<Media[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [activeTag, setActiveTag] = useState(0);
   const [filteredMedia, setFilteredMedia] = useState<Media[]>([]);
 
@@ -34,14 +33,13 @@ const Library: React.FC = () => {
 
   const fetchUserMedia = async () => {
     setIsLoading(true);
-    setError('');
     try {
       const response = await getUserMedia();
       setMedia(response.data);
       setFilteredMedia(response.data);
     } catch (error) {
       console.error('Failed to fetch user media', error);
-      setError('Failed to load media. Please try again.');
+      alert('Failed to load media. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -98,8 +96,6 @@ const Library: React.FC = () => {
           )}
         </div>
       </div>
-
-      {error && <p className="text-red-500 mb-4">{error}</p>}
 
       {!isSearching && (
         <div className="flex space-x-2 mb-4">

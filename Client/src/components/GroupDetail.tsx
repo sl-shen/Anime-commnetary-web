@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import MediaList from '../components/MediaList';
 import GroupMediaSearch from '../components/GroupMediaSearch';
-import { FaUsers, FaBook, FaFilm, FaMusic, FaGamepad, FaUser } from 'react-icons/fa';
+import { FaUsers, FaBook, FaFilm, FaMusic, FaGamepad, FaUser, FaTheaterMasks } from 'react-icons/fa';
 
 interface Media {
   id: number;
@@ -25,12 +25,12 @@ interface Group {
 }
 
 const mediaTypes = [
-  { id: 0, name: "全部" },
-  { id: 1, name: "书籍" },
-  { id: 2, name: "动画" },
-  { id: 3, name: "音乐" },
-  { id: 4, name: "游戏" },
-  { id: 6, name: "真人" }
+  { id: 0, name: "全部", icon: FaBook },
+  { id: 1, name: "书籍", icon: FaBook },
+  { id: 2, name: "动画", icon: FaFilm },
+  { id: 3, name: "音乐", icon: FaMusic },
+  { id: 4, name: "游戏", icon: FaGamepad },
+  { id: 6, name: "真人", icon: FaTheaterMasks }
 ];
 
 const GroupDetail: React.FC = () => {
@@ -156,6 +156,7 @@ const GroupDetail: React.FC = () => {
                 <FaFilm className="text-red-300" />
                 <FaMusic className="text-green-300" />
                 <FaGamepad className="text-blue-300" />
+                <FaTheaterMasks className="text-blue-300" />
               </div>
             </div>
           </div>
@@ -178,18 +179,19 @@ const GroupDetail: React.FC = () => {
 
 
 
-      {!isSearching && (
+        {!isSearching && (
         <div className="flex space-x-2 mb-4">
           {mediaTypes.map(type => (
             <button
               key={type.id}
               onClick={() => setActiveTag(type.id)}
-              className={`px-4 py-2 rounded ${
+              className={`px-4 py-2 rounded flex items-center ${
                 activeTag === type.id
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700'
               }`}
             >
+              <type.icon className="mr-2" />
               {type.name}
             </button>
           ))}

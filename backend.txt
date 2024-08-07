@@ -12,3 +12,6 @@ Features:
    delete user
 
 4.
+
+手动添加媒体
+讨论区
