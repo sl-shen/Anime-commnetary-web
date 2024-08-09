@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { FaUsers, FaPlus, FaSync, FaTrash, FaEye } from 'react-icons/fa';
 
+const apiUrl = "http://localhost:8000"
+
 interface Group {
   id: number;
   name: string;
@@ -25,7 +27,7 @@ const GroupLibrary: React.FC = () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/groups/get', {
+      const response = await axios.get(`${apiUrl}/groups/get`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setGroups(response.data);
@@ -45,7 +47,7 @@ const GroupLibrary: React.FC = () => {
     }
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:8000/groups/create', {
+      await axios.post(`${apiUrl}/groups/create`, {
         name: newGroupName,
         description: newGroupDescription
       }, 
@@ -65,7 +67,7 @@ const GroupLibrary: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this group?')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:8000/groups/${groupId}`, {
+        await axios.delete(`${apiUrl}/groups/${groupId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         fetchGroups();

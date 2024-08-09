@@ -7,6 +7,8 @@ import { FaStar, FaArrowLeft, FaTrash, FaPencilAlt, FaPlus } from 'react-icons/f
 import { Link } from 'react-router-dom';
 import { FaComments } from 'react-icons/fa';
 
+const apiUrl = "http://localhost:8000"
+
 interface Media {
   id: number;
   title: string;
@@ -58,7 +60,7 @@ const GroupMediaDetail: React.FC = () => {
   const fetchMediaDetails = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8000/groups/${groupId}/media/${mediaId}`, {
+      const response = await axios.get(`${apiUrl}/groups/${groupId}/media/${mediaId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMedia(response.data);
@@ -73,7 +75,7 @@ const GroupMediaDetail: React.FC = () => {
   const fetchReviews = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8000/groups/${groupId}/media/${mediaId}/reviews`, {
+      const response = await axios.get(`${apiUrl}/groups/${groupId}/media/${mediaId}/reviews`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data && response.data.length > 0) {
@@ -90,7 +92,7 @@ const GroupMediaDetail: React.FC = () => {
   const fetchCurrentUser = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/info', {
+      const response = await axios.get(`${apiUrl}/info`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCurrentUser(response.data);
@@ -116,7 +118,7 @@ const GroupMediaDetail: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:8000/groups/${groupId}/reviews/${reviewId}`, {
+      await axios.delete(`${apiUrl}/groups/${groupId}/reviews/${reviewId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       //console.log("Review deleted successfully");
@@ -135,7 +137,7 @@ const GroupMediaDetail: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:8000/groups/${groupId}/media/${mediaId}`, {
+      await axios.delete(`${apiUrl}/groups/${groupId}/media/${mediaId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       //console.log("Media deleted successfully");

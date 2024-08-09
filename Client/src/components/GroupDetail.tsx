@@ -5,6 +5,8 @@ import MediaList from '../components/MediaList';
 import GroupMediaSearch from '../components/GroupMediaSearch';
 import { FaUsers, FaBook, FaFilm, FaMusic, FaGamepad, FaUser, FaTheaterMasks } from 'react-icons/fa';
 
+const apiUrl = "http://localhost:8000"
+
 interface Media {
   id: number;
   title: string;
@@ -55,14 +57,14 @@ const GroupDetail: React.FC = () => {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const groupResponse = await axios.get(`http://localhost:8000/groups/${id}`, { headers });
+      const groupResponse = await axios.get(`${apiUrl}/groups/${id}`, { headers });
       setGroupInfo(groupResponse.data);
 
-      const mediaResponse = await axios.get(`http://localhost:8000/groups/${id}/media`, { headers });
+      const mediaResponse = await axios.get(`${apiUrl}/groups/${id}/media`, { headers });
       setMedia(mediaResponse.data);
       setFilteredMedia(mediaResponse.data);
 
-      const membersResponse = await axios.get(`http://localhost:8000/groups/${id}/members`, { headers });
+      const membersResponse = await axios.get(`${apiUrl}/groups/${id}/members`, { headers });
       setMembers(membersResponse.data);
     } catch (error) {
       //console.error('Failed to fetch group details', error);
@@ -85,7 +87,7 @@ const GroupDetail: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://localhost:8000/groups/${id}/invite`,
+        `${apiUrl}/groups/${id}/invite`,
         { username: newMemberUsername },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -114,7 +116,7 @@ const GroupDetail: React.FC = () => {
     if (window.confirm('Are you sure you want to remove this member?')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:8000/groups/${id}/members/${memberId}`, {
+        await axios.delete(`${apiUrl}/groups/${id}/members/${memberId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         fetchGroupDetails();

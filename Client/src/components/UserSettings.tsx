@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const apiUrl = "http://localhost:8000"
+
 interface User {
   username: string;
   email: string;
@@ -20,7 +22,7 @@ const UserSettings: React.FC = () => {
   const fetchUserInfo = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/info', {
+      const response = await axios.get(`${apiUrl}/info`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(response.data);
@@ -42,7 +44,7 @@ const UserSettings: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.put('http://localhost:8000/update', 
+      await axios.put(`${apiUrl}/update`, 
         { username: newUsername },
         { headers: { Authorization: `Bearer ${token}` } }
       );

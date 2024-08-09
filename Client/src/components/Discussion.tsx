@@ -4,6 +4,8 @@ import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FaArrowLeft, FaPlus, FaReply, FaTrash } from 'react-icons/fa';
 
+const apiUrl = "http://localhost:8000"
+
 interface Discussion {
   id: number;
   title: string;
@@ -43,7 +45,7 @@ const DiscussionPage: React.FC = () => {
   const fetchDiscussions = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8000/groups/${groupId}/media/${mediaId}/discussions/`, {
+      const response = await axios.get(`${apiUrl}/groups/${groupId}/media/${mediaId}/discussions/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDiscussions(response.data);
@@ -57,7 +59,7 @@ const DiscussionPage: React.FC = () => {
   const fetchCurrentUser = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/info', {
+      const response = await axios.get(`${apiUrl}/info`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCurrentUser(response.data);
@@ -71,7 +73,7 @@ const DiscussionPage: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://localhost:8000/groups/${groupId}/media/${mediaId}/discussions/`,
+        `${apiUrl}/groups/${groupId}/media/${mediaId}/discussions/`,
         newDiscussion,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -86,7 +88,7 @@ const DiscussionPage: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://localhost:8000/discussions/${discussionId}/comments/`,
+        `${apiUrl}/discussions/${discussionId}/comments/`,
         { content: newComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -100,7 +102,7 @@ const DiscussionPage: React.FC = () => {
   const fetchDiscussionDetails = async (discussionId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8000/discussions/${discussionId}`, {
+      const response = await axios.get(`${apiUrl}/discussions/${discussionId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSelectedDiscussion(response.data);
@@ -113,7 +115,7 @@ const DiscussionPage: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this discussion? This action cannot be undone.')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:8000/discussions/${discussionId}`, {
+        await axios.delete(`${apiUrl}/discussions/${discussionId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         fetchDiscussions();

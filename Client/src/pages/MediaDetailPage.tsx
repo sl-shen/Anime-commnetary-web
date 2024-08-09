@@ -5,6 +5,8 @@ import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FaStar, FaArrowLeft, FaTrash, FaPencilAlt, FaPlus } from 'react-icons/fa';
 
+const apiUrl = "http://localhost:8000"
+
 interface Media {
   id: number;
   title: string;
@@ -47,7 +49,7 @@ const MediaDetail: React.FC = () => {
 
   const fetchMediaDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/media/get/${id}`);
+      const response = await axios.get(`${apiUrl}/media/get/${id}`);
       setMedia(response.data[0]);
     } catch (error) {
       console.error('Failed to fetch media details', error);
@@ -59,7 +61,7 @@ const MediaDetail: React.FC = () => {
 
   const fetchReviews = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/reviews/media/${id}`);
+      const response = await axios.get(`${apiUrl}/reviews/media/${id}`);
       if (response.data && response.data.length > 0) {
         setReviews(response.data);
       } else {
@@ -83,7 +85,7 @@ const MediaDetail: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:8000/reviews/delete/${reviewId}`, {
+      await axios.delete(`${apiUrl}/reviews/delete/${reviewId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log("Review deleted successfully");
@@ -102,7 +104,7 @@ const MediaDetail: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:8000/media/delete/${media.id}`, {
+      await axios.delete(`${apiUrl}/media/delete/${media.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log("Media deleted successfully");

@@ -3,6 +3,8 @@ import { searchMedia} from '../services/ApiService';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
+const apiUrl = "http://localhost:8000"
+
 interface SearchResult {
   id: number;
   title: string;
@@ -56,7 +58,7 @@ const MediaSearch: React.FC<{ onAddMedia: () => void }> = ({ onAddMedia }) => {
     //   console.log('Sending media data:', mediaData); 
     //   console.log('search res:', media);
       await axios.post(
-        `http://localhost:8000/groups/${groupId}/media`, 
+        `${apiUrl}/groups/${groupId}/media`, 
         mediaData,
         {
           headers: { Authorization: `Bearer ${token}` }

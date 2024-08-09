@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const apiUrl = "http://localhost:8000"
+
 const RegisterForm: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -13,7 +15,7 @@ const RegisterForm: React.FC = () => {
     e.preventDefault();
     setError('');
     try {
-      await axios.post('http://localhost:8000/register', { username, email, password });
+      await axios.post(`${apiUrl}/register`, { username, email, password });
       navigate('/login');
     } catch (error) {
       console.error('Registration failed', error);

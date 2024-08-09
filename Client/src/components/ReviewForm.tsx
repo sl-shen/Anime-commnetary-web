@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const apiUrl = "http://localhost:8000"
+
 interface ReviewFormProps {
   mediaId: number;
   initialReview?: { id: number; text: string; rating: number };
@@ -37,10 +39,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ mediaId, initialReview, onRevie
 
       if (initialReview) {
         console.log('Sending update data:', { text, rating });
-        await axios.put(`http://localhost:8000/reviews/update/${initialReview.id}`, { text, rating }, config);
+        await axios.put(`${apiUrl}/reviews/update/${initialReview.id}`, { text, rating }, config);
       } else {
         console.log('Sending add data:', { text, rating });
-        await axios.post(`http://localhost:8000/reviews/add/${mediaId}`, { text, rating }, config);
+        await axios.post(`${apiUrl}/reviews/add/${mediaId}`, { text, rating }, config);
       }
       onReviewSubmit();
       if (!initialReview) {

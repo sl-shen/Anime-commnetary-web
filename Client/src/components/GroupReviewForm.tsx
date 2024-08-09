@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const apiUrl = "http://localhost:8000"
+
 interface GroupReviewFormProps {
   groupId: number;
   mediaId: number;
@@ -50,10 +52,10 @@ const GroupReviewForm: React.FC<GroupReviewFormProps> = ({
           return;
         }
         console.log('Sending update data:', { text, rating });
-        await axios.put(`http://localhost:8000/groups/${groupId}/reviews/update/${initialReview.id}`, { text, rating }, config);
+        await axios.put(`${apiUrl}/groups/${groupId}/reviews/update/${initialReview.id}`, { text, rating }, config);
       } else {
         console.log('Sending add data:', { text, rating });
-        await axios.post(`http://localhost:8000/groups/${groupId}/media/${mediaId}/review`, { text, rating }, config);
+        await axios.post(`${apiUrl}/groups/${groupId}/media/${mediaId}/review`, { text, rating }, config);
       }
       onReviewSubmit();
       if (!initialReview) {
