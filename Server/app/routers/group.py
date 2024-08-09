@@ -162,7 +162,7 @@ def delete_group(
     if group.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Only the group owner can delete the group")
     
-    crud.delete_group(db, group_id)
+    crud.delete_group(db, group_id, current_user.id)
     return {"message": "Group deleted successfully"}
 
 @router.get("/{group_id}/media/{media_id}", response_model=schemas.GroupMedia)
@@ -216,3 +216,37 @@ def delete_group_media(
     if result["status"] == "error":
         raise HTTPException(status_code=403, detail=result["message"])
     return {"message": result["message"]}
+
+@router.post("/{group_id}/media/{media_id}/discussions/", response_model=schemas.Discussion)
+def create_discussion(
+    group_id: int,
+    media_id: int,
+    discussion: schemas.DiscussionCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    discussion_data = crud.create_discussion(db=db, discussion=discussion, user_id=current_user.id, group_id=group_id, media_id=media_id)
+    return schemas.Discussion(**discussion_data)
+
+@router.get("/{group_id}/media/{media_id}/discussions/", response_model=List[schemas.Discussion])
+def read_discussions(
+    group_id: int,
+    media_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    discussions = crud.get_discussions(db, group_id=group_id, media_id=media_id, skip=skip, limit=limit)
+    discussions_data =[ {
+            "id": discussion.id,
+            "title": discussion.title,
+            "content": discussion.content,
+            "created_at": discussion.created_at,
+            "user_id": discussion.user_id,
+            "group_id": discussion.group_id,
+            "media_id": discussion.media_id,
+            "username": discussion.user.username if discussion.user else None
+        } for discussion in discussions
+    ]
+    return discussions_data

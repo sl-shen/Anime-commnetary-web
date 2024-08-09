@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
+from typing import List
 
 class UserBase(BaseModel):
     username: str
@@ -188,3 +189,49 @@ class GroupReviewUpdate(BaseModel):
 
 class Message(BaseModel):
     message: str
+
+
+class CommentBase(BaseModel):
+    content: str
+
+class CommentCreate(CommentBase):
+    pass
+
+class Comment(CommentBase):
+    id: int
+    created_at: datetime
+    user_id: int
+    discussion_id: int
+    username: str  
+
+    class Config:
+        orm_mode = True
+
+class DiscussionBase(BaseModel):
+    title: str
+    content: str
+
+class DiscussionCreate(DiscussionBase):
+    pass
+
+class Discussion(DiscussionBase):
+    id: int
+    created_at: datetime
+    user_id: int
+    group_id: int
+    media_id: int
+    username: str  
+
+    class Config:
+        orm_mode = True
+
+class DiscussionWithComments(DiscussionBase):
+    id: int
+    created_at: datetime
+    user_id: int
+    group_id: int
+    media_id: int
+    username: str
+    comments: List[Comment]
+
+    model_config = ConfigDict(from_attributes=True)

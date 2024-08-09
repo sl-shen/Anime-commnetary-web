@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Tabl
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
+from sqlalchemy.ext.hybrid import hybrid_property
 
 group_members = Table('group_members', Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id')),
@@ -21,6 +22,10 @@ class Group(Base):
     members = relationship("User", secondary=group_members, back_populates="groups")
     media = relationship("GroupMedia", back_populates="group")
     discussions = relationship("Discussion", back_populates="group")
+
+    @hybrid_property
+    def owner_name(self):
+        return self.owner.username if self.owner else None
 
 class GroupMedia(Base):
     __tablename__ = "group_media"
@@ -68,6 +73,10 @@ class Discussion(Base):
     media = relationship("GroupMedia")
     comments = relationship("Comment", back_populates="discussion")
 
+    @hybrid_property
+    def username(self):
+        return self.user.username if self.user else None
+
 class Comment(Base):
     __tablename__ = "comments"
 
@@ -79,6 +88,10 @@ class Comment(Base):
 
     user = relationship("User", back_populates="comments")
     discussion = relationship("Discussion", back_populates="comments")
+
+    @hybrid_property
+    def username(self):
+        return self.user.username if self.user else None
 
 class User(Base):
     __tablename__ = "users"

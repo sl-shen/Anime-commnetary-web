@@ -24,12 +24,27 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      handle401Error();
     }
     return Promise.reject(error);
   }
 );
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      handle401Error();
+    }
+    return Promise.reject(error);
+  }
+);
+
+const handle401Error = () => {
+  localStorage.removeItem('token');
+  window.location.href = '/login';
+};
+
 
 export const login = (username: string, password: string) => {
   const formData = new FormData();

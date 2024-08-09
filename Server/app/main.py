@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from . import models
-from .routers import users, media, reviews, bangumi, group
+from .routers import users, media, reviews, bangumi, group, discussion
 from dotenv import load_dotenv
 import uvicorn
 import logging
@@ -39,6 +39,7 @@ app.include_router(reviews.router, prefix="/reviews", tags=["reviews"])
 app.include_router(bangumi.router, prefix="/bangumi", tags=["bangumi"])
 app.include_router(media.router, prefix="/media", tags=["media"])
 app.include_router(group.router, prefix="/groups", tags=["groups"])
+app.include_router(discussion.router, prefix="/discussions", tags=["discussions"])
 
 @app.get("/")
 async def root():

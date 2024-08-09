@@ -4,6 +4,8 @@ import GroupReviewForm from '../components/GroupReviewForm';
 import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FaStar, FaArrowLeft, FaTrash, FaPencilAlt, FaPlus } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { FaComments } from 'react-icons/fa';
 
 interface Media {
   id: number;
@@ -198,6 +200,14 @@ const GroupMediaDetail: React.FC = () => {
               <h1 className="text-4xl font-bold text-gray-900 mb-4">{media.title}</h1>
               <p className="text-gray-600 leading-relaxed">{media.summary}</p>
             </div>
+          </div>
+          <div className="p-4 bg-gray-100">
+            <Link
+              to={`/groups/${groupId}/media/${mediaId}/discussions`}
+              className="flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300"
+            >
+              <FaComments className="mr-2" /> 进入讨论区
+            </Link>
           </div>
         </div>
 
