@@ -34,7 +34,7 @@ class GroupMedia(Base):
     title = Column(String, index=True)
     image = Column(String)
     summary = Column(String)
-    bangumi_id = Column(Integer)
+    bangumi_id = Column(Integer, index=True, nullable=True)
     media_type = Column(Integer)
     group_id = Column(Integer, ForeignKey("groups.id"))
     added_by_id = Column(Integer, ForeignKey("users.id"))
@@ -114,7 +114,7 @@ class UserMedia(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    bangumi_id = Column(Integer, index=True)
+    bangumi_id = Column(Integer, index=True, nullable=True)
     title = Column(String, index=True)
     media_type = Column(Integer)  # 1=book, 2=anime, 3=music, 4=game, 6=real
     image = Column(String)

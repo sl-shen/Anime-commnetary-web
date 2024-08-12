@@ -56,8 +56,22 @@ def remove_group_member(
 
 
 @router.post("/{group_id}/media", response_model=schemas.GroupMedia)
-def add_media_to_group(group_id: int, media: schemas.GroupMediaCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def add_media_to_group(
+    group_id: int, 
+    media: schemas.GroupMediaCreate, 
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(get_current_user)
+):
     return crud.add_media_to_group(db=db, group_id=group_id, media=media, user_id=current_user.id)
+
+@router.post("/{group_id}/media/add-manual", response_model=schemas.GroupMedia)
+def add_manual_group_media(
+    group_id: int,
+    media: schemas.ManualGroupMediaCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    return crud.create_manual_group_media(db=db, group_id=group_id, media=media, user_id=current_user.id)
 
 @router.post("/{group_id}/media/{media_id}/review", response_model=schemas.GroupReview)
 def add_review_to_group_media(

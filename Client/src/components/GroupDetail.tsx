@@ -3,7 +3,8 @@ import { useParams } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import MediaList from '../components/MediaList';
 import GroupMediaSearch from '../components/GroupMediaSearch';
-import { FaUsers, FaBook, FaFilm, FaMusic, FaGamepad, FaUser, FaTheaterMasks } from 'react-icons/fa';
+import ManualGroupMediaAdd from '../components/ManualGroupMediaAdd';
+import { FaUsers, FaBook, FaFilm, FaMusic, FaGamepad, FaUser, FaTheaterMasks, FaPlus, FaPencilAlt } from 'react-icons/fa';
 
 const apiUrl = "http://localhost:8000"
 
@@ -40,6 +41,7 @@ const GroupDetail: React.FC = () => {
   const [media, setMedia] = useState<Media[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isManualAdding, setIsManualAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTag, setActiveTag] = useState(0);
   const [filteredMedia, setFilteredMedia] = useState<Media[]>([]);
@@ -67,7 +69,6 @@ const GroupDetail: React.FC = () => {
       const membersResponse = await axios.get(`${apiUrl}/groups/${id}/members`, { headers });
       setMembers(membersResponse.data);
     } catch (error) {
-      //console.error('Failed to fetch group details', error);
       alert('Failed to load group details. Please try again.');
     } finally {
       setIsLoading(false);
@@ -94,7 +95,6 @@ const GroupDetail: React.FC = () => {
       setNewMemberUsername('');
       fetchGroupDetails();
     } catch (error: unknown) {
-      //console.error('Failed to add member', error);
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError;
         if (axiosError.response && axiosError.response.status === 404) {
@@ -121,7 +121,6 @@ const GroupDetail: React.FC = () => {
         });
         fetchGroupDetails();
       } catch (error: unknown) {
-        //console.error('Failed to remove member', error);
         if (axios.isAxiosError(error)) {
           if (error.response?.status === 403) {
             alert('Only the group creator can remove members.');
@@ -169,20 +168,34 @@ const GroupDetail: React.FC = () => {
             >
               Manage Members
             </button>
-            <button
-              onClick={() => setIsSearching(!isSearching)}
-              className="px-4 py-2 bg-white text-purple-600 rounded hover:bg-purple-100 transition duration-300"
-            >
-              {isSearching ? 'Back to Library' : 'Add New Media'}
-            </button>
+            <div>
+              <button
+                onClick={() => {
+                  setIsSearching(false);
+                  setIsManualAdding(!isManualAdding);
+                }}
+                className="px-4 py-2 bg-white text-purple-600 rounded hover:bg-purple-100 transition duration-300 mr-2"
+              >
+                <FaPencilAlt className="inline-block mr-1" />
+                {isManualAdding ? 'Back to Library' : 'Add Manually'}
+              </button>
+              <button
+                onClick={() => {
+                  setIsManualAdding(false);
+                  setIsSearching(!isSearching);
+                }}
+                className="px-4 py-2 bg-white text-purple-600 rounded hover:bg-purple-100 transition duration-300"
+              >
+                <FaPlus className="inline-block mr-1" />
+                {isSearching ? 'Back to Library' : 'Search and Add'}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-
-
-        {!isSearching && (
-        <div className="flex space-x-2 mb-4">
+      {!isSearching && !isManualAdding && (
+        <div className="flex flex-wrap gap-2 mb-4">
           {mediaTypes.map(type => (
             <button
               key={type.id}
@@ -202,6 +215,8 @@ const GroupDetail: React.FC = () => {
 
       {isSearching ? (
         <GroupMediaSearch onAddMedia={fetchGroupDetails} />
+      ) : isManualAdding ? (
+        <ManualGroupMediaAdd groupId={id!} onAddMedia={fetchGroupDetails} />
       ) : (
         <MediaList media={filteredMedia} isGroupMedia={true}/>
       )}

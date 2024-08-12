@@ -41,6 +41,13 @@ def create_user_media(db: Session, user_id: int, media: schemas.UserMediaCreate)
     db.refresh(db_media)
     return db_media
 
+def create_manual_user_media(db: Session, user_id: int, media: schemas.ManualMediaCreate):
+    db_media = models.UserMedia(**media.dict(), user_id=user_id)
+    db.add(db_media)
+    db.commit()
+    db.refresh(db_media)
+    return db_media
+
 def get_user_media(db: Session, user_id: int):
     return db.query(models.UserMedia).filter(models.UserMedia.user_id == user_id).all()
 
@@ -173,6 +180,18 @@ def remove_group_member(db: Session, group_id: int, member_id: int):
     }
 
 def add_media_to_group(db: Session, group_id: int, media: schemas.GroupMediaCreate, user_id: int):
+    group = db.query(models.Group).filter(models.Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    if user_id not in [member.id for member in group.members]:
+        raise HTTPException(status_code=403, detail="User is not a member of this group")
+    db_media = models.GroupMedia(**media.dict(), group_id=group_id, added_by_id=user_id)
+    db.add(db_media)
+    db.commit()
+    db.refresh(db_media)
+    return db_media
+
+def create_manual_group_media(db: Session, group_id: int, media: schemas.ManualGroupMediaCreate, user_id: int):
     group = db.query(models.Group).filter(models.Group.id == group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")

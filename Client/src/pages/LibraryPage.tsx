@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import MediaList from '../components/MediaList';
 import MediaSearch from '../components/MediaSearch';
+import ManualMediaAdd from '../components/ManualMediaAdd';
 import { getUserMedia } from '../services/ApiService';
-import { FaBook, FaFilm, FaMusic, FaGamepad, FaTheaterMasks, FaPlus, FaSync } from 'react-icons/fa';
+import { FaBook, FaFilm, FaMusic, FaGamepad, FaTheaterMasks, FaPlus, FaSync, FaPencilAlt } from 'react-icons/fa';
 
 interface Media {
   id: number;
@@ -23,6 +24,7 @@ const mediaTypes = [
 const Library: React.FC = () => {
   const [media, setMedia] = useState<Media[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isManualAdding, setIsManualAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTag, setActiveTag] = useState(0);
   const [filteredMedia, setFilteredMedia] = useState<Media[]>([]);
@@ -77,14 +79,29 @@ const Library: React.FC = () => {
           </div>
         </div>
         <div className="mt-4 flex justify-between items-center">
-          <button
-            onClick={() => setIsSearching(!isSearching)}
-            className="px-4 py-2 bg-white text-purple-600 rounded hover:bg-purple-100 transition duration-300 flex items-center"
-          >
-            <FaPlus className="mr-2" />
-            {isSearching ? 'Back to Library' : 'Add New Media'}
-          </button>
-          {!isSearching && (
+          <div className="flex space-x-2">
+            <button
+              onClick={() => {
+                setIsSearching(false);
+                setIsManualAdding(!isManualAdding);
+              }}
+              className="px-4 py-2 bg-white text-purple-600 rounded hover:bg-purple-100 transition duration-300 flex items-center"
+            >
+              <FaPencilAlt className="mr-2" />
+              {isManualAdding ? 'Back to Library' : 'Add Manually'}
+            </button>
+            <button
+              onClick={() => {
+                setIsManualAdding(false);
+                setIsSearching(!isSearching);
+              }}
+              className="px-4 py-2 bg-white text-purple-600 rounded hover:bg-purple-100 transition duration-300 flex items-center"
+            >
+              <FaPlus className="mr-2" />
+              {isSearching ? 'Back to Library' : 'Search and Add'}
+            </button>
+          </div>
+          {!isSearching && !isManualAdding && (
             <button
               onClick={handleRefresh}
               className="px-4 py-2 bg-white text-blue-600 rounded hover:bg-blue-100 transition duration-300 flex items-center"
@@ -97,8 +114,8 @@ const Library: React.FC = () => {
         </div>
       </div>
 
-      {!isSearching && (
-        <div className="flex space-x-2 mb-4">
+      {!isSearching && !isManualAdding && (
+        <div className="flex flex-wrap gap-2 mb-4">
           {mediaTypes.map(type => (
             <button
               key={type.id}
@@ -118,6 +135,8 @@ const Library: React.FC = () => {
 
       {isSearching ? (
         <MediaSearch onAddMedia={handleRefresh} />
+      ) : isManualAdding ? (
+        <ManualMediaAdd onAddMedia={handleRefresh} />
       ) : (
         <MediaList media={filteredMedia} />
       )}

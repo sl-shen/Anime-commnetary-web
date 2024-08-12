@@ -37,7 +37,7 @@ class BangumiSearchResult(BaseModel):
     type: int
 
 class UserMediaBase(BaseModel):
-    bangumi_id: int
+    bangumi_id: Optional[int] = None
     title: str
     media_type: int
     image: str
@@ -45,6 +45,13 @@ class UserMediaBase(BaseModel):
 
 class UserMediaCreate(UserMediaBase):
     pass
+
+class ManualMediaCreate(BaseModel):
+    title: str
+    media_type: int
+    image: str = ""
+    summary: str = ""
+    bangumi_id: Optional[int] = None
 
 class UserMedia(UserMediaBase):
     id: int
@@ -96,7 +103,7 @@ class GroupMediaBase(BaseModel):
     title: str
     image: Optional[str] = None
     summary: Optional[str] = None
-    bangumi_id: int
+    bangumi_id: Optional[int] = None
     media_type: int
 
 class GroupMediaCreate(BaseModel):
@@ -105,6 +112,13 @@ class GroupMediaCreate(BaseModel):
     summary: str
     bangumi_id: int
     media_type: int
+
+class ManualGroupMediaCreate(BaseModel):
+    title: str
+    media_type: int
+    image: str = ""
+    summary: str = ""
+    bangumi_id: Optional[int] = None
     
 class GroupMedia(GroupMediaBase):
     id: int

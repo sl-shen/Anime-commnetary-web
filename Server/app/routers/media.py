@@ -33,3 +33,10 @@ async def get_media(
 ):
     return crud.get_single_media(db, media_id=media_id)
   
+@router.post("/add-manual", response_model=schemas.UserMedia)
+def add_manual_media(
+    media: schemas.ManualMediaCreate,
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user)
+):
+    return crud.create_manual_user_media(db=db, user_id=current_user.id, media=media)
